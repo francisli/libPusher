@@ -96,6 +96,8 @@
  */
 @interface PTPusherPrivateChannel : PTPusherChannel
 
+@property (nonatomic, retain) NSDictionary *authData;
+
 ///------------------------------------------------------------------------------------/
 /// @name Triggering events
 ///------------------------------------------------------------------------------------/

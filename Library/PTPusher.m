@@ -159,6 +159,22 @@ NSURL *PTPusherConnectionURL(NSString *host, NSString *key, NSString *clientID, 
   return (PTPusherPrivateChannel *)[self subscribeToChannelNamed:[NSString stringWithFormat:@"private-%@", name]];
 }
 
+- (PTPusherPrivateChannel *)subscribeToPrivateChannelNamed:(NSString *)name withAuthorization:(NSDictionary *)authorization {
+    if (![name hasPrefix:@"private-"]) {
+        name = [NSString stringWithFormat:@"private-%@", name];
+    }
+    PTPusherPrivateChannel *channel = (PTPusherPrivateChannel *)[channels objectForKey:name];
+    if (channel == nil) {
+        channel = (PTPusherPrivateChannel *)[PTPusherChannel channelWithName:name pusher:self]; 
+        channel.authData = authorization;
+        [channels setObject:channel forKey:name];
+    }
+    if (self.connection.isConnected) {
+        [self subscribeToChannel:channel];
+    }
+    return channel;
+}
+
 - (PTPusherPresenceChannel *)subscribeToPresenceChannelNamed:(NSString *)name
 {
   return (PTPusherPresenceChannel *)[self subscribeToChannelNamed:[NSString stringWithFormat:@"presence-%@", name]];

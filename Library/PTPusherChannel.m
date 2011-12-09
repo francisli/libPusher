@@ -133,6 +133,8 @@
 
 @implementation PTPusherPrivateChannel
 
+@synthesize authData;
+
 - (id)initWithName:(NSString *)channelName pusher:(PTPusher *)aPusher
 {
   if ((self = [super initWithName:channelName pusher:aPusher])) {
@@ -146,6 +148,11 @@
                       target:self action:@selector(handleSubscribeErrorEvent:)];
   }
   return self;
+}
+
+- (void)dealloc {
+    self.authData = nil;
+    [super dealloc];
 }
 
 - (BOOL)isPrivate
@@ -173,17 +180,21 @@
 
 - (void)authorizeWithCompletionHandler:(void(^)(BOOL, NSDictionary *))completionHandler
 {
-  PTPusherChannelAuthorizationOperation *authOperation = [PTPusherChannelAuthorizationOperation operationWithAuthorizationURL:pusher.authorizationURL channelName:self.name socketID:pusher.connection.socketID];
-  
-  [authOperation setCompletionHandler:^(PTPusherChannelAuthorizationOperation *operation) {
-    completionHandler(operation.isAuthorized, operation.authorizationData);
-  }];
-  
-  if ([pusher.delegate respondsToSelector:@selector(pusher:willAuthorizeChannelWithRequest:)]) {
-    [pusher.delegate pusher:pusher willAuthorizeChannelWithRequest:authOperation.mutableURLRequest];
-  }
-  
-  [[NSOperationQueue mainQueue] addOperation:authOperation];
+    if (self.authData) {
+        completionHandler(YES, self.authData);
+    } else {
+        PTPusherChannelAuthorizationOperation *authOperation = [PTPusherChannelAuthorizationOperation operationWithAuthorizationURL:pusher.authorizationURL channelName:self.name socketID:pusher.connection.socketID];
+        
+        [authOperation setCompletionHandler:^(PTPusherChannelAuthorizationOperation *operation) {
+            completionHandler(operation.isAuthorized, operation.authorizationData);
+        }];
+        
+        if ([pusher.delegate respondsToSelector:@selector(pusher:willAuthorizeChannelWithRequest:)]) {
+            [pusher.delegate pusher:pusher willAuthorizeChannelWithRequest:authOperation.mutableURLRequest];
+        }
+        
+        [[NSOperationQueue mainQueue] addOperation:authOperation];
+    }
 }
 
 - (void)subscribeWithAuthorization:(NSDictionary *)authData

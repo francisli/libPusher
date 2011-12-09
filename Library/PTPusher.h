@@ -200,6 +200,7 @@ extern NSString *const PTPusherErrorUnderlyingEventKey;
  @param name The name of the channel (without the private prefix) to subscribe to.
  */
 - (PTPusherPrivateChannel *)subscribeToPrivateChannelNamed:(NSString *)name;
+- (PTPusherPrivateChannel *)subscribeToPrivateChannelNamed:(NSString *)name withAuthorization:(NSDictionary *)authorization;
 
 /** Subscribes to the named presence channel.
  
